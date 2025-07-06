@@ -71,7 +71,7 @@ Matrix nextMelody = model.predict(seed);
 
 ### 🖼️ Output
 
-<img src="assets/Output.png" width="700" />
+<img src="Output.png" width="700" />
 
 This shows a printed sequence of generated notes, predicted one-by-one, simulating a musical continuation.
 
@@ -96,13 +96,13 @@ hₜ = (1 - zₜ) ⊙ hₜ₋₁ + zₜ ⊙ ĥₜ
 
 ### 🖼️ GRU Architecture
 
-<img src="assets/GRU-RNN.png" width="650" />
+<img src="GRU-RNN.png" width="650" />
 
 ---
 
 ## 🧠 LSTM Architecture
 
-<img src="assets/LSTM-RNN.png" width="700" />
+<img src="LSTM-RNN.png" width="700" />
 
 This shows the flow of data through input, forget, and output gates and how memory is updated and passed.
 
