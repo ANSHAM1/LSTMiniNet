@@ -1,4 +1,4 @@
-﻿export module RNN_LSTM;
+export module RNN_LSTM;
 
 import Matrix;
 import  RevAutoDiffEngine;
@@ -22,35 +22,29 @@ struct QUADRAAPLET {
 	QUADRAAPLET() = default;
 };
 
-class LSTM_Node {
-public:
-	pair<shared_ptr<Node>, shared_ptr<Node>> forward(QUADRAAPLET& Ws, QUADRAAPLET& Us, QUADRAAPLET& Bs, shared_ptr<Node>& xt, shared_ptr<Node>& ht_1, shared_ptr<Node>& ct_1) {
-		//Forget Gate - Controls how much of the past cell state to keep.
-		shared_ptr<Node> Ft = sigmoid(xt * Ws.F + ht_1 * Us.F + Bs.F);
-		//fₜ ∈[0, 1]: Closer to 1 means keep information, closer to 0 means forget.
-
-		//Input Gate - Controls what new information to add to the cell state.
-		shared_ptr<Node> It = sigmoid(xt * Ws.I + ht_1 * Us.I + Bs.I);
-		shared_ptr<Node> Ct_cap = tanh(xt * Ws.C + ht_1 * Us.C + Bs.C);
-		shared_ptr<Node> Ct = elementaryProduct(Ft, ct_1) + elementaryProduct(It, Ct_cap);
-		//Combines retained memory and new information
-
-		//Output Gate - What to send as output and Decides what part of the cell state becomes the hidden state.
-		shared_ptr<Node> Ot = sigmoid(xt * Ws.O + ht_1 * Us.O + Bs.O);
-		shared_ptr<Node> Ht = elementaryProduct(Ot, tanh(Ct));
-		//hₜ is the final output passed to next timestep
-
-		return { Ht, Ct };
-	}
-};
-
 export class LSTM_RNN {
 	int CELL_SIZE, HIDDEN_SIZE, VOCAB_SIZE;
 	unordered_map<int, int> MELODY_VOCAB;
 
-	shared_ptr<LSTM_Node> RNN;
 	QUADRAAPLET Ws, Us, Bs;
 	shared_ptr<Node> Wo, Bo;
+
+private:
+	pair<shared_ptr<Node>, shared_ptr<Node>> forward(QUADRAAPLET& Ws, QUADRAAPLET& Us, QUADRAAPLET& Bs, shared_ptr<Node>& xt, shared_ptr<Node>& ht_1, shared_ptr<Node>& ct_1) {
+		//Forget Gate
+		shared_ptr<Node> Ft = sigmoid(xt * Ws.F + ht_1 * Us.F + Bs.F);
+
+		//Input Gate 
+		shared_ptr<Node> It = sigmoid(xt * Ws.I + ht_1 * Us.I + Bs.I);
+		shared_ptr<Node> Ct_cap = tanh(xt * Ws.C + ht_1 * Us.C + Bs.C);
+		shared_ptr<Node> Ct = elementaryProduct(Ft, ct_1) + elementaryProduct(It, Ct_cap);
+		
+		//Output Gate
+		shared_ptr<Node> Ot = sigmoid(xt * Ws.O + ht_1 * Us.O + Bs.O);
+		shared_ptr<Node> Ht = elementaryProduct(Ot, tanh(Ct));
+
+		return { Ht, Ct };
+	}
 
 public:
 	LSTM_RNN(int cell, int hidden, unordered_map<int, int>& vocab)
@@ -65,7 +59,6 @@ public:
 
 		Wo = randM(hidden, VOCAB_SIZE);
 		Bo = zeroM(1, VOCAB_SIZE);
-		RNN = make_shared<LSTM_Node>();
 	}
 
 	void Train(vector<vector<int>>& dataset, vector<int>& targets,
@@ -80,7 +73,7 @@ public:
 
 				for (int t = 0; t < dataset[i].size(); ++t) {
 					shared_ptr<Node> xt = make_shared<Node>(oneHotMatrix(MELODY_VOCAB, dataset[i][t]));
-					tie(ht, ct) = RNN->forward(Ws, Us, Bs, xt, ht, ct);
+					tie(ht, ct) = forward(Ws, Us, Bs, xt, ht, ct);
 					if (truncateStep > 0 && t % truncateStep == 0) {
 						ht = detach(ht);
 						ct = detach(ct);
@@ -111,7 +104,7 @@ public:
 
 		for (int k = 0; k < data.size(); ++k) {
 			shared_ptr<Node> x = make_shared<Node>(oneHotMatrix(MELODY_VOCAB, data[k]));
-			auto [Ht, Ct] = RNN->forward(Ws, Us, Bs, x, ht_1, ct_1);
+			auto [Ht, Ct] = forward(Ws, Us, Bs, x, ht_1, ct_1);
 			ht_1 = Ht;
 			ct_1 = Ct;
 		}
