@@ -108,12 +108,6 @@ This shows the flow of data through input, forget, and output gates and how memo
 
 ---
 
-## 📃 License
-
-MIT License © 2025 MAURYA
-
----
-
 ## 💬 Author Note
 
 This project is part of a larger initiative to build deep learning models from scratch in C++, without relying on external frameworks. Stay tuned for more architectures like GRU, Transformer, and full sequence-to-sequence models!
