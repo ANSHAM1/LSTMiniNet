@@ -108,6 +108,11 @@ This shows the flow of data through input, forget, and output gates and how memo
 
 ---
 
+## 🚨 Known Issues
+- [Memory leak in training loop](https://github.com/ANSHAM1/LSTMiniNet/issues/1)
+
+---
+
 ## 💬 Author Note
 
 This project is part of a larger initiative to build deep learning models from scratch in C++, without relying on external frameworks. Stay tuned for more architectures like GRU, Transformer, and full sequence-to-sequence models!
